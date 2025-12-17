@@ -3,5 +3,8 @@
   hosts: jenkins
   become: yes
   roles:
+    - ans_role_java
+    - ans_role_maven
     - ans_role_jenkins
+    - ans_role_docker
     - ans_role_jenkins_plugins

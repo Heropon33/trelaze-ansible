@@ -3,7 +3,6 @@
   apt:
     name: 
       - fontconfig
-      - openjdk-21-jre
     state: present
     update_cache: yes
 
@@ -20,12 +19,6 @@
 - name: Installer Jenkins
   apt:
     name: jenkins
-    state: present
-    update_cache: yes
-
-- name: Installer Maven sur le système
-  apt:
-    name: maven
     state: present
     update_cache: yes
 

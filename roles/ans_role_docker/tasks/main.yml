@@ -1,0 +1,10 @@
+- name: Installer Docker engine
+  apt:
+    name: docker.io
+    state: present
+
+- name: Ajouter l'utilisateur jenkins au groupe docker
+  user:
+    name: jenkins
+    groups: docker
+    append: yes
