@@ -2,4 +2,4 @@
 - name: Installation du node Exporter
   hosts: all
   roles: 
-    - ans_role_node_exporter
+    - role: ans_role_node_exporter
