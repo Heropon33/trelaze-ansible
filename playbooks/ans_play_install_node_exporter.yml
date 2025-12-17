@@ -1,5 +1,4 @@
 ---
 - name: Installation du node Exporter
   hosts: git,jenkins
-  roles:
-    - role: ans_role_node_exporter
+  roles: ans_role_node_exporter
