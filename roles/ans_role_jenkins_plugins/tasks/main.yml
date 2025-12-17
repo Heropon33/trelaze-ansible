@@ -5,14 +5,24 @@
     dest: /opt/jenkins-plugin-manager.jar
     mode: '0755'
 
-- name: Installer les plugins Git, Docker et Prometheus
-  shell: |
-    java -jar /opt/jenkins-plugin-manager.jar \
-    --war /usr/share/java/jenkins.war \
-    --plugin-file /var/lib/jenkins/plugins.txt \
-    --plugins git docker-workflow prometheus maven-plugin config-file-provider
-  args:
-    creates: /var/lib/jenkins/plugins/prometheus.jpi
+
+- name: Installer la dépendance Python pour le module Jenkins d'Ansible
+  apt:
+    name: python3-jenkins
+    state: present
+
+    
+- name: Installer les plugins avec le module natif
+  community.general.jenkins_plugin:
+    name: "{{ item }}"
+    state: present
+    url: "http://localhost:8080"
+    url_username: "admin"
+    url_password: "{{ jenkins_admin_password }}" # La variable vient de set_fact
+  loop:
+    - git
+    - maven-plugin
+    - docker-workflow
   notify: Restart Jenkins
 
 - name: S'assurer que les permissions sont correctes sur le dossier plugins

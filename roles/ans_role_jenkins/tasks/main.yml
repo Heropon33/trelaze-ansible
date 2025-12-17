@@ -40,3 +40,7 @@
 - name: Afficher le mot de passe initial
   debug:
     msg: "Le mot de passe initial est : {{ admin_password_raw['content'] | b64decode }}"
+
+- name: Exposer le mot de passe pour les autres rôles
+  set_fact:
+    jenkins_admin_password: "{{ admin_password_raw['content'] | b64decode | trim }}"
