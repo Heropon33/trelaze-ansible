@@ -1,3 +1,11 @@
 #!/bin/bash
-export ANSIBLE_CONFIG="$(cd "$(dirname "$0")" && pwd)/ansible.cfg"
-ansible-playbook playbooks/$1 -i inventory
+set -e
+
+# Répertoire du script (racine du projet)
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+cd "$PROJECT_ROOT"
+
+export ANSIBLE_CONFIG="$PROJECT_ROOT/ansible.cfg"
+
+exec ansible-playbook "$@"
