@@ -23,6 +23,7 @@
     - git
     - maven-plugin
     - docker-workflow
+    - prometheus
   notify: Restart Jenkins
 
 - name: S'assurer que les permissions sont correctes sur le dossier plugins
