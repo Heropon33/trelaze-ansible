@@ -4,3 +4,4 @@
   become: yes
   roles:
     - ans_role_jenkins
+    - ans_role_jenkins_plugins
