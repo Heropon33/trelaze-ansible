@@ -1,4 +1,6 @@
 ---
+
+# play git
 - name: Install poste developpeur
   hosts: git01
   tasks:
