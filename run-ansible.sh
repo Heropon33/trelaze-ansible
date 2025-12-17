@@ -1,3 +1,3 @@
 #!/bin/bash
 export ANSIBLE_CONFIG="$(cd "$(dirname "$0")" && pwd)/ansible.cfg"
-ansible-playbook "$@" -i inventory
+ansible-playbook playbooks/$1 -i inventory
