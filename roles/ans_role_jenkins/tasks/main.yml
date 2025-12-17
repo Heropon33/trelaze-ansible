@@ -1,0 +1,73 @@
+---
+- name: Installer les dépendances nécessaires
+  apt:
+    name: 
+      - fontconfig
+      - openjdk-21-jre
+    state: present
+    update_cache: yes
+
+- name: Ajouter la clé GPG de Jenkins
+  apt_key:
+    url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+    state: present
+
+- name: Ajouter le dépôt Jenkins
+  apt_repository:
+    repo: deb https://pkg.jenkins.io/debian-stable binary/
+    state: present
+
+- name: Installer Jenkins
+  apt:
+    name: jenkins
+    state: present
+    update_cache: yes
+
+- name: Installer Maven sur le système
+  apt:
+    name: maven
+    state: present
+    update_cache: yes
+
+- name: S'assurer que Jenkins est démarré et activé
+  service:
+    name: jenkins
+    state: started
+    enabled: yes
+
+- name: Attendre que le fichier de mot de passe initial soit généré
+  wait_for:
+    path: /var/lib/jenkins/secrets/initialAdminPassword
+
+- name: Récupérer le mot de passe initial de l'admin
+  slurp:
+    src: /var/lib/jenkins/secrets/initialAdminPassword
+  register: admin_password_raw
+
+- name: Afficher le mot de passe initial
+  debug:
+    msg: "Le mot de passe initial est : {{ admin_password_raw['content'] | b64decode }}"
+
+
+- name: Télécharger le Jenkins Plugin Manager CLI
+  get_url:
+    url: https://github.com/jenkinsci/plugin-installation-manager-tool/releases/latest/download/jenkins-plugin-manager-2.12.15.jar
+    dest: /opt/jenkins-plugin-manager.jar
+    mode: '0755'
+
+- name: Installer les plugins Git, Docker et Prometheus
+  shell: |
+    java -jar /opt/jenkins-plugin-manager.jar \
+    --war /usr/share/java/jenkins.war \
+    --plugin-file /var/lib/jenkins/plugins.txt \
+    --plugins git docker-workflow prometheus maven-plugin config-file-provider
+  args:
+    creates: /var/lib/jenkins/plugins/prometheus.jpi
+  notify: Restart Jenkins
+
+- name: S'assurer que les permissions sont correctes sur le dossier plugins
+  file:
+    path: /var/lib/jenkins/plugins
+    owner: jenkins
+    group: jenkins
+    recurse: yes

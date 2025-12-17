@@ -1,0 +1,6 @@
+---
+- name: Déploiement de Jenkins sur Ubuntu 24.04
+  hosts: jenkins
+  become: yes
+  roles:
+    - ans_role_jenkins
