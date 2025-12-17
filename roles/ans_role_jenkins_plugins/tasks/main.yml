@@ -1,0 +1,23 @@
+
+- name: Télécharger le Jenkins Plugin Manager CLI
+  get_url:
+    url: https://github.com/jenkinsci/plugin-installation-manager-tool/releases/latest/download/jenkins-plugin-manager-2.13.2.jar
+    dest: /opt/jenkins-plugin-manager.jar
+    mode: '0755'
+
+- name: Installer les plugins Git, Docker et Prometheus
+  shell: |
+    java -jar /opt/jenkins-plugin-manager.jar \
+    --war /usr/share/java/jenkins.war \
+    --plugin-file /var/lib/jenkins/plugins.txt \
+    --plugins git docker-workflow prometheus maven-plugin config-file-provider
+  args:
+    creates: /var/lib/jenkins/plugins/prometheus.jpi
+  notify: Restart Jenkins
+
+- name: S'assurer que les permissions sont correctes sur le dossier plugins
+  file:
+    path: /var/lib/jenkins/plugins
+    owner: jenkins
+    group: jenkins
+    recurse: yes
