@@ -1,0 +1,7 @@
+[servers]
+git ansible_host=159.8.76.123
+jenkins ansible_host=159.8.76.125
+supervision ansible_host=159.8.76.116
+
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3
