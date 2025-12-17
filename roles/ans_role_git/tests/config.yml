@@ -1,0 +1,5 @@
+---
+- hosts: all
+  tasks:
+    - name: Config git
+      ansible.builtin.include_tasks: ../tasks/config.yml
