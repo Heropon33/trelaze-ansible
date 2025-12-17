@@ -1,0 +1,10 @@
+- name: Installer Grafana
+  ansible.builtin.apt:
+    name: grafana
+    state: present
+
+- name: Activer et démarrer Grafana
+  ansible.builtin.systemd:
+    name: grafana-server
+    enabled: true
+    state: started

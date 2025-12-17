@@ -1,0 +1,10 @@
+- name: Installer Prometheus
+  ansible.builtin.apt:
+    name: prometheus
+    state: present
+
+- name: Activer et démarrer Prometheus
+  ansible.builtin.systemd:
+    name: prometheus
+    enabled: true
+    state: started
