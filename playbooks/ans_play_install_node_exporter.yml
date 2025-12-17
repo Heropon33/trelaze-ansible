@@ -1,5 +1,5 @@
 ---
-- name: Installation groupe supervision
-  hosts: supervision
+- name: Installation Node Exporter sur tous les noeuds
+  hosts: all
   roles:
     - role: ans_role_node_exporter
