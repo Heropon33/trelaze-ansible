@@ -1,4 +1,0 @@
-[servers]
-git ansible_host=159.8.76.123
-jenkins ansible_host=159.8.76.125
-supervision ansible_host=159.8.76.116
