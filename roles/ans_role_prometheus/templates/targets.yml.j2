@@ -1,5 +1,9 @@
+{% for host in groups['all'] %}
 - targets:
-    - '159.8.76.125:9100'
+    - '{{ hostvars[host].ansible_host }}:9100'
   labels:
-    hostname: 'jenkins01'
-    env: 'integration'
+    hostname: '{{ host }}'
+{% if hostvars[host].env is defined %}
+    env: '{{ hostvars[host].env }}'
+{% endif %}
+{% endfor %}
