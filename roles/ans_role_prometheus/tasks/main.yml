@@ -17,3 +17,11 @@
     group: prometheus
     mode: "0644"
   notify: Redémarrer Prometheus
+
+- name: Déployer la liste des targets (pas de redémarrage)
+  ansible.builtin.template:
+    src: targets.yml.j2
+    dest: /etc/prometheus/targets.yml
+    owner: prometheus
+    group: prometheus
+    mode: "0644"
