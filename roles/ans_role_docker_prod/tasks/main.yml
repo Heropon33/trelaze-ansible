@@ -1,0 +1,16 @@
+- name: Installer Docker
+  apt:
+    name: docker.io
+    state: present
+
+- name: Demarrer le service Docker
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Ajouter l'utilisateur ubuntu au groupe docker
+  user:
+    name: ubuntu
+    groups: docker
+    append: yes
