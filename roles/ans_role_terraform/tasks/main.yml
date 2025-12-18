@@ -13,12 +13,12 @@
     dest: /usr/share/keyrings/opentofu-archive-keyring.gpg
     mode: '0644'
 
-- name: Ajouter le dépôt OpenTofu
-  ansible.builtin.apt_repository:
+- name: Ajouter le dépôt OpenTofu (jammy compatible noble)
+  apt_repository:
     repo: >
       deb [signed-by=/usr/share/keyrings/opentofu-archive-keyring.gpg]
       https://packages.opentofu.org/opentofu/apt
-      {{ ansible_distribution_release }} main
+      jammy main
     state: present
     filename: opentofu
 
@@ -33,6 +33,6 @@
   register: tofu_version
   changed_when: false
 
-- name: Vérifier la version d'OpenTofu
+- name: Vérifier la d'OpenTofu
   ansible.builtin.debug:
     msg: "{{ tofu_version.stdout }}"
