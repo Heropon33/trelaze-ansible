@@ -1,0 +1,39 @@
+  vars:
+    tomcat_service: tomcat
+    tomcat_webapps: /opt/tomcat/current/webapps
+    tomcat_user: tomcat
+    tomcat_group: tomcat
+
+    war_name: petclinic
+    war_file: files/petclinic.war
+
+  tasks:
+
+    - name: Stop Tomcat (optional but safe)
+      systemd:
+        name: "{{ tomcat_service }}"
+        state: stopped
+
+    - name: Remove old deployment
+      file:
+        path: "{{ tomcat_webapps }}/{{ war_name }}"
+        state: absent
+
+    - name: Remove old WAR
+      file:
+        path: "{{ tomcat_webapps }}/{{ war_name }}.war"
+        state: absent
+
+    - name: Copy WAR to Tomcat
+      copy:
+        src: "{{ war_file }}"
+        dest: "{{ tomcat_webapps }}/{{ war_name }}.war"
+        owner: "{{ tomcat_user }}"
+        group: "{{ tomcat_group }}"
+        mode: '0644'
+
+    - name: Start Tomcat
+      systemd:
+        name: "{{ tomcat_service }}"
+        state: started
+        enabled: yes
