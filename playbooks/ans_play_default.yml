@@ -1,0 +1,23 @@
+---
+- name: Configuration du hostname depuis l'inventaire
+  hosts: webserver
+  become: yes
+  tasks:
+    - name: Modifier le hostname de la machine
+      ansible.builtin.hostname:
+        name: "{{ inventory_hostname }}"
+
+    - name: Mettre à jour le fichier /etc/hosts pour éviter les erreurs sudo
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        regexp: '^127\.0\.1\.1'
+        line: "127.0.1.1 {{ inventory_hostname }}"
+        state: present
+
+    - name: S'assurer que cloud-init ne réinitialise pas le hostname
+          ansible.builtin.lineinfile:
+            path: /etc/cloud/cloud.cfg
+            regexp: '^preserve_hostname:'
+            line: 'preserve_hostname: true'
+            state: present
+
