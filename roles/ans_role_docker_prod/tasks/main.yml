@@ -1,7 +1,11 @@
-- name: Installer Docker
+- name: Installer Docker et le plugin Compose
   apt:
-    name: docker.io
+    name: 
+      - docker.io
+      - docker-buildx
+      - docker-compose-v2  # C'est ce paquet qui active la commande "docker compose"
     state: present
+    update_cache: yes
 
 - name: Demarrer le service Docker
   service:
