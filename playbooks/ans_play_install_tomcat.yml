@@ -1,0 +1,5 @@
+---
+- name: Installation Tomcat sur les noeuds WEB
+  hosts: webserver
+  roles:
+    - role: ans_role_tomcat
