@@ -50,10 +50,10 @@ scrape_configs:
 
   - job_name: 'jenkins'
     metrics_path: /prometheus/
-      scrape_interval: 300s
-      scrape_timeout: 30s
-      scheme: https
-      tls_config:
-        insecure_skip_verify: true
-      static_configs:
-        - targets: ["{{ hostvars['jenkins01'].ansible_host }}:8080"]
+    scrape_interval: 300s
+    scrape_timeout: 30s
+    scheme: http
+    tls_config:
+      insecure_skip_verify: true
+    static_configs:
+      - targets: ["{{ hostvars['jenkins01'].ansible_host }}:8080"]
