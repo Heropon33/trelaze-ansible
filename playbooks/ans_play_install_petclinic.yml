@@ -1,3 +1,4 @@
+---
   vars:
     tomcat_service: tomcat
     tomcat_webapps: /opt/tomcat/current/webapps
