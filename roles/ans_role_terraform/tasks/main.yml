@@ -1,0 +1,38 @@
+- name: Installer les dépendances nécessaires
+  ansible.builtin.apt:
+    name:
+      - curl
+      - gnupg
+      - software-properties-common
+    state: present
+    update_cache: true
+
+- name: Ajouter la clé GPG OpenTofu
+  ansible.builtin.get_url:
+    url: https://packages.opentofu.org/opentofu.gpg
+    dest: /usr/share/keyrings/opentofu-archive-keyring.gpg
+    mode: '0644'
+
+- name: Ajouter le dépôt OpenTofu
+  ansible.builtin.apt_repository:
+    repo: >
+      deb [signed-by=/usr/share/keyrings/opentofu-archive-keyring.gpg]
+      https://packages.opentofu.org/opentofu/apt
+      {{ ansible_distribution_release }} main
+    state: present
+    filename: opentofu
+
+- name: Installer OpenTofu
+  ansible.builtin.apt:
+    name: opentofu
+    state: present
+    update_cache: true
+
+- name: Vérifier l'installation d'OpenTofu
+  ansible.builtin.command: tofu version
+  register: tofu_version
+  changed_when: false
+
+- name: Vérifier la version d'OpenTofu
+  ansible.builtin.debug:
+    msg: "{{ tofu_version.stdout }}"

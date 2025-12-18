@@ -1,0 +1,10 @@
+- name: Cloner le dépôt Robot Shop
+  git:
+    repo: 'https://github.com/instana/robot-shop.git'
+    dest: /opt/robot-shop
+    version: master
+
+- name: Lancer l'application avec Docker Compose
+  shell:
+    cmd: docker compose up -d
+    chdir: /opt/robot-shop

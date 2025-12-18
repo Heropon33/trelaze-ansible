@@ -1,0 +1,8 @@
+---
+- name: Deploiement de Stan's Robot Shop
+  hosts: webserver02
+  become: yes
+  roles:
+    - ans_role_robot_shop_tools
+    - ans_role_docker_prod
+    - ans_role_robot_shop

@@ -1,5 +1,0 @@
----
-- hosts: all
-  tasks:
-    - name: Install apt git
-      ansible.builtin.include_tasks: ../tasks/install.yml
