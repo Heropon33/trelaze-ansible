@@ -1,0 +1,6 @@
+---
+- name: Déploiement du terraform master
+  hosts: terraform
+  become: yes
+  roles:
+    - ans_role_terraform

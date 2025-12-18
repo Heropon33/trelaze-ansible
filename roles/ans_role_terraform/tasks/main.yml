@@ -1,0 +1,33 @@
+- name: Installer les dépendances de APT pour OpenTofu
+  apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg
+    state: present
+    update_cache: yes
+
+- name: Télécharger le script d'installation OpenTofu
+  ansible.builtin.get_url:
+    url: https://get.opentofu.org/install-opentofu.sh
+    dest: /tmp/install-opentofu.sh
+    mode: '0755'
+
+- name: Exécuter le script d'installation OpenTofu
+  command: /tmp/install-opentofu.sh --install-method deb
+  args:
+    creates: /usr/bin/tofu
+
+- name: Supprimer le script d'installation
+  file:
+    path: /tmp/install-opentofu.sh
+    state: absent
+
+- name: Vérifier la version OpenTofu installée
+  command: tofu version
+  register: opentofu_version
+  changed_when: false
+
+- debug:
+    msg: "{{ opentofu_version.stdout }}"
