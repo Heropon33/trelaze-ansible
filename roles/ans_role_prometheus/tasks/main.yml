@@ -8,3 +8,12 @@
     name: prometheus
     enabled: true
     state: started
+
+- name: Déployer la configuration Prometheus
+  ansible.builtin.template:
+    src: prometheus.yml.j2
+    dest: /etc/prometheus/prometheus.yml
+    owner: prometheus
+    group: prometheus
+    mode: "0644"
+  notify: Redémarrer Prometheus
