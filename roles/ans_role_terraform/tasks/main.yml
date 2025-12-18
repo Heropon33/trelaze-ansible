@@ -1,38 +1,33 @@
-- name: Installer les dépendances nécessaires
-  ansible.builtin.apt:
+- name: Installer les dépendances de APT pour OpenTofu
+  apt:
     name:
+      - apt-transport-https
+      - ca-certificates
       - curl
       - gnupg
-      - software-properties-common
     state: present
-    update_cache: true
+    update_cache: yes
 
-- name: Ajouter la clé GPG OpenTofu
+- name: Télécharger le script d'installation OpenTofu
   ansible.builtin.get_url:
-    url: https://packages.opentofu.org/opentofu.gpg
-    dest: /usr/share/keyrings/opentofu-archive-keyring.gpg
-    mode: '0644'
+    url: https://get.opentofu.org/install-opentofu.sh
+    dest: /tmp/install-opentofu.sh
+    mode: '0755'
 
-- name: Ajouter le dépôt OpenTofu (jammy compatible noble)
-  apt_repository:
-    repo: >
-      deb [signed-by=/usr/share/keyrings/opentofu-archive-keyring.gpg]
-      https://packages.opentofu.org/opentofu/apt
-      jammy main
-    state: present
-    filename: opentofu
+- name: Exécuter le script d'installation OpenTofu
+  command: /tmp/install-opentofu.sh --install-method deb
+  args:
+    creates: /usr/bin/tofu
 
-- name: Installer OpenTofu
-  ansible.builtin.apt:
-    name: opentofu
-    state: present
-    update_cache: true
+- name: Supprimer le script d'installation
+  file:
+    path: /tmp/install-opentofu.sh
+    state: absent
 
-- name: Vérifier l'installation d'OpenTofu
-  ansible.builtin.command: tofu version
-  register: tofu_version
+- name: Vérifier la version OpenTofu installée
+  command: tofu version
+  register: opentofu_version
   changed_when: false
 
-- name: Vérifier la d'OpenTofu
-  ansible.builtin.debug:
-    msg: "{{ tofu_version.stdout }}"
+- debug:
+    msg: "{{ opentofu_version.stdout }}"
