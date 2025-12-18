@@ -1,3 +1,9 @@
+- name: Activer le dépôt Universe
+  ansible.builtin.apt_repository:
+    repo: "deb http://archive.ubuntu.com/ubuntu {{ ansible_distribution_release }} universe"
+    state: present
+    update_cache: yes
+
 - name: Installer Node Exporter
   ansible.builtin.apt:
     name: prometheus-node-exporter
