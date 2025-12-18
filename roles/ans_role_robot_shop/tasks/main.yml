@@ -1,8 +1,10 @@
-- name: Mise à jour des dépôts
-  apt:
-    update_cache: yes
+- name: Cloner le dépôt Robot Shop
+  git:
+    repo: 'https://github.com/instana/robot-shop.git'
+    dest: /opt/robot-shop
+    version: master
 
-- name: Installation des outils de base
-  apt:
-    name: [git, curl, unzip, python3-pip, python3-venv]
-    state: present
+- name: Lancer l'application avec Docker Compose
+  shell:
+    cmd: docker compose up -d
+    chdir: /opt/robot-shop
