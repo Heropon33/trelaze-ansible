@@ -1,14 +1,15 @@
-- name: Download Tomcat
-  get_url:
-    url: "https://dlcdn.apache.org/tomcat/tomcat-11/v11.0.15/bin/apache-tomcat-11.0.15.tar.gz"
-    dest: /opt/
-- name: Extract Tomcat
-  unarchive:
-    src: /opt/apache-tomcat-11.0.15.tar.gz
-    dest: /opt/
-    remote_src: yes
-- name: Start Tomcat Service
-  service:
-    name: tomcat
-    state: started
-    enabled: yes
+    - name: Installer Tomcat
+      apt:
+        name: tomcat9
+        state: present
+
+    - name: Installer les outils admin Tomcat
+      apt:
+        name: tomcat9-admin
+        state: present
+
+    - name: S'assurer que Tomcat est démarré
+      service:
+        name: tomcat9
+        state: started
+        enabled: yes
