@@ -1,1 +1,1 @@
-global_scrape_interval: '10s'
+global_scrape_interval: '15s'
