@@ -1,5 +1,5 @@
 ---
-- name: Deploiement de Stan's Robot Shop
+- name: Deploiement de Stan's Robot Shop2
   hosts: webserver03
   become: yes
   roles:
