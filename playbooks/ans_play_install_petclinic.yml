@@ -24,9 +24,9 @@
         path: "{{ tomcat_webapps }}/{{ war_name }}.war"
         state: absent
 
-    - name: Copy WAR to Tomcat
-      copy:
-        src: "{{ war_file }}"
+    - name: Download file from GitHub
+      get_url:
+        url: "https://github.com/Heropon33/petclinic/blob/master/target/petclinic.war"
         dest: "{{ tomcat_webapps }}/{{ war_name }}.war"
         owner: "{{ tomcat_user }}"
         group: "{{ tomcat_group }}"
