@@ -57,3 +57,7 @@ scrape_configs:
       insecure_skip_verify: true
     static_configs:
       - targets: ["{{ hostvars['jenkins01'].ansible_host }}:8080"]
+
+  - job_name: 'robot-shop-containers'
+    static_configs:
+      - targets: ["{{ hostvars['webserver03'].ansible_host }}:8081"]
