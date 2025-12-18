@@ -1,15 +1,15 @@
     - name: Installer Tomcat
       apt:
-        name: tomcat9
+        name: tomcat10
         state: present
 
     - name: Installer les outils admin Tomcat
       apt:
-        name: tomcat9-admin
+        name: tomcat10-admin
         state: present
 
     - name: S'assurer que Tomcat est démarré
       service:
-        name: tomcat9
+        name: tomcat10
         state: started
         enabled: yes
