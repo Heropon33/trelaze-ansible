@@ -1,4 +1,6 @@
 ---
+- name: Installation Petclinic sur les noeuds WEB
+  hosts: webserver
   vars:
     tomcat_service: tomcat
     tomcat_webapps: /opt/tomcat/current/webapps
@@ -27,7 +29,7 @@
 
     - name: Download file from GitHub
       get_url:
-        url: "https://github.com/Heropon33/petclinic/blob/master/target/petclinic.war"
+        url: "https://raw.githubusercontent.com/Heropon33/petclinic/master/target/petclinic.war"
         dest: "{{ tomcat_webapps }}/{{ war_name }}.war"
         owner: "{{ tomcat_user }}"
         group: "{{ tomcat_group }}"
