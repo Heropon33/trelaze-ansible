@@ -1,5 +1,5 @@
 - name: Installer Node Exporter
-  ansible.builtin.package:
+  ansible.builtin.apt:
     name: prometheus-node-exporter
     state: present
 
