@@ -1,50 +1,33 @@
 ---
-- name: Arrêter Loki pour la mise à jour
+- name: S'assurer que Loki est arrêté
   systemd:
     name: loki
     state: stopped
   ignore_errors: yes
 
-- name: Supprimer l'ancien binaire corrompu ou obsolète
-  file:
-    path: /usr/local/bin/loki-linux-amd64
-    state: absent
-
-- name: Télécharger Loki v3.0.0 (Version stable pour OTLP)
-  get_url:
-    url: "https://github.com/grafana/loki/releases/download/v3.0.0/loki-linux-amd64.zip"
-    dest: "/tmp/loki_v3.zip"
-    mode: '0644'
-
-- name: Dézipper le binaire v3.0.0
-  unarchive:
-    src: "/tmp/loki_v3.zip"
-    dest: "/usr/local/bin"
-    remote_src: yes
-    owner: root
-    group: root
-    mode: '0755'
-
-- name: Créer le répertoire de données Loki
+- name: Nettoyer les répertoires pour repartir sur du propre
   file:
     path: "{{ item }}"
     state: directory
     owner: root
     group: root
-    mode: '0755'
+    mode: '0777'
   loop:
     - /tmp/loki
     - /tmp/loki/chunks
     - /tmp/loki/rules
+    - /tmp/loki/wal
 
-- name: Configurer Loki (YAML v3 compatible)
+- name: Appliquer la configuration Loki v3 (Syntaxe Distributor)
   copy:
     dest: /etc/loki-config.yaml
     content: |
       auth_enabled: false
+
       server:
         http_listen_port: 3100
         grpc_listen_port: 9096
+
       common:
         instance_addr: 127.0.0.1
         path_prefix: /tmp/loki
@@ -56,9 +39,24 @@
         ring:
           kvstore:
             store: inmemory
-      otlp:
-        grpc_listen_address: "0.0.0.0:4317"
-        http_listen_address: "0.0.0.0:4318"
+
+      # Dans la v3, l'OTLP est souvent rattaché au distributeur
+      distributor:
+        receivers:
+          otlp:
+            grpc:
+              endpoint: 0.0.0.0:4317
+            http:
+              endpoint: 0.0.0.0:4318
+
+      ingester:
+        wal:
+          enabled: true
+          dir: /tmp/loki/wal
+
+      limits_config:
+        allow_structured_metadata: true
+
       schema_config:
         configs:
           - from: 2020-10-24
@@ -69,21 +67,7 @@
               prefix: index_
               period: 24h
 
-- name: Mise à jour du service Systemd
-  copy:
-    dest: /etc/systemd/system/loki.service
-    content: |
-      [Unit]
-      Description=Loki Service v3
-      After=network.target
-      [Service]
-      Type=simple
-      ExecStart=/usr/local/bin/loki-linux-amd64 -config.file=/etc/loki-config.yaml
-      Restart=always
-      [Install]
-      WantedBy=multi-user.target
-
-- name: Recharger systemd et démarrer Loki v3
+- name: Relancer Loki v3
   systemd:
     name: loki
     state: restarted
