@@ -1,66 +1,69 @@
 ---
-- name: Arrêter Loki
-  systemd:
+- name: Créer l'utilisateur système Loki
+  user:
     name: loki
-    state: stopped
-  ignore_errors: yes
+    system: yes
+    shell: /sbin/nologin
 
-- name: SUPPRIMER les anciennes données (Changement de format de DB requis)
-  file:
-    path: /tmp/loki
-    state: absent
+- name: Télécharger le binaire Loki
+  get_url:
+    url: "https://github.com/grafana/loki/releases/download/v3.0.0/loki-linux-amd64.zip"
+    dest: /tmp/loki.zip
 
-- name: Recréer les répertoires
+- name: Installer unzip
+  package:
+    name: unzip
+    state: present
+
+- name: Décompresser le binaire Loki
+  unarchive:
+    src: /tmp/loki.zip
+    dest: /usr/local/bin
+    remote_src: yes
+    creates: /usr/local/bin/loki-linux-amd64
+
+- name: Créer les répertoires de configuration et de données
   file:
     path: "{{ item }}"
     state: directory
-    owner: root
-    group: root
-    mode: '0777'
-  loop:
+    owner: loki
+    group: loki
+    mode: '0755'
+  with_items:
+    - /etc/loki
     - /tmp/loki
+    - /tmp/loki/index
     - /tmp/loki/chunks
-    - /tmp/loki/rules
 
-- name: Déployer Config Loki v3 (Compatible OTLP/TSDB)
+- name: Déployer la configuration Loki
+  template:
+    src: loki-config.yaml.j2
+    dest: /etc/loki/loki-config.yaml
+    owner: loki
+    group: loki
+  notify: restart loki
+
+- name: Créer le service systemd pour Loki
   copy:
-    dest: /etc/loki-config.yaml
+    dest: /etc/systemd/system/loki.service
     content: |
-      auth_enabled: false
+      [Unit]
+      Description=Loki service
+      After=network.target
 
-      server:
-        http_listen_port: 3100
-        grpc_listen_port: 9096
+      [Service]
+      Type=simple
+      User=loki
+      ExecStart=/usr/local/bin/loki-linux-amd64 -config.file=/etc/loki/loki-config.yaml
+      Restart=on-failure
 
-      common:
-        instance_addr: 127.0.0.1
-        path_prefix: /tmp/loki
-        storage:
-          filesystem:
-            chunks_directory: /tmp/loki/chunks
-            rules_directory: /tmp/loki/rules
-        replication_factor: 1
-        ring:
-          kvstore:
-            store: inmemory
+      [Install]
+      WantedBy=multi-user.target
+  notify: restart loki
 
-      schema_config:
-        configs:
-          - from: 2024-01-01
-            store: tsdb            # <-- CHANGEMENT ICI (était boltdb-shipper)
-            object_store: filesystem
-            schema: v13            # <-- CHANGEMENT ICI (était v11)
-            index:
-              prefix: index_
-              period: 24h
-
-      # Cette section est maintenant valide car on est en v13/tsdb
-      limits_config:
-        allow_structured_metadata: true
-
-- name: Démarrer Loki
+- name: Démarrer et activer le service Loki
   systemd:
     name: loki
-    state: restarted
+    state: started
     enabled: yes
     daemon_reload: yes
