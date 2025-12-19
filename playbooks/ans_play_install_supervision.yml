@@ -5,3 +5,4 @@
     - role: ans_role_prometheus
     - role: ans_role_grafana
     - role: ans_role_node_exporter
+    - role: ans_role_loki

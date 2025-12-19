@@ -1,0 +1,26 @@
+---
+- name: Télécharger le paquet OTel
+  get_url:
+    url: "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.90.0/otelcol-contrib_0.90.0_linux_amd64.deb"
+    dest: "/tmp/otelcol.deb"
+
+- name: Installer le paquet
+  apt:
+    deb: "/tmp/otelcol.deb"
+
+- name: Configurer OTel
+  template:
+    src: otel-config.yaml.j2
+    dest: /etc/otelcol-contrib/config.yaml
+
+- name: Ajouter otelcol au groupe docker pour lire les logs
+  user:
+    name: otelcol
+    groups: docker
+    append: yes
+
+- name: Relancer OTel
+  systemd:
+    name: otelcol-contrib
+    state: restarted
+    enabled: yes

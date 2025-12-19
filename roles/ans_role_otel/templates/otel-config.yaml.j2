@@ -1,0 +1,34 @@
+receivers:
+  filelog:
+    include: [ /var/lib/docker/containers/*/*.log ]
+    operators:
+      - type: json_parser
+        timestamp:
+          parse_from: attributes.time
+          layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+  hostmetrics:
+    collection_interval: 30s
+    scrapers:
+      cpu:
+      memory:
+      disk:
+
+processors:
+  batch:
+
+exporters:
+  otlp:
+    endpoint: "{{ hostvars['supervision']['ansible_host'] }}:4317"
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    logs:
+      receivers: [filelog]
+      processors: [batch]
+      exporters: [otlp]
+    metrics:
+      receivers: [hostmetrics]
+      processors: [batch]
+      exporters: [otlp]

@@ -1,0 +1,63 @@
+---
+- name: Installer unzip
+  apt:
+    name: unzip
+    state: present
+
+- name: Télécharger Loki
+  get_url:
+    url: "https://github.com/grafana/loki/releases/download/v2.9.4/loki-linux-amd64.zip"
+    dest: "/tmp/loki.zip"
+
+- name: Dézipper Loki
+  unarchive:
+    src: "/tmp/loki.zip"
+    dest: "/usr/local/bin"
+    remote_src: yes
+
+- name: Créer la configuration Loki
+  copy:
+    dest: /etc/loki-config.yaml
+    content: |
+      auth_enabled: false
+      server:
+        http_listen_port: 3100
+      common:
+        path_prefix: /tmp/loki
+        storage:
+          filesystem:
+            chunks_directory: /tmp/loki/chunks
+            rules_directory: /tmp/loki/rules
+        replication_factor: 1
+        ring:
+          kvstore:
+            store: inmemory
+      otlp:
+        grpc_listen_address: "0.0.0.0:4317"
+      schema_config:
+        configs:
+          - from: 2020-10-24
+            store: boltdb-shipper
+            object_store: filesystem
+            schema: v11
+            index:
+              prefix: index_
+              period: 24h
+
+- name: Créer le service Systemd pour Loki
+  copy:
+    dest: /etc/systemd/system/loki.service
+    content: |
+      [Unit]
+      Description=Loki Service
+      [Service]
+      ExecStart=/usr/local/bin/loki-linux-amd64 -config.file=/etc/loki-config.yaml
+      Restart=always
+      [Install]
+      WantedBy=multi-user.target
+
+- name: Démarrer Loki
+  systemd:
+    name: loki
+    state: started
+    enabled: yes
