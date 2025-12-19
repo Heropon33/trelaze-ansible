@@ -1,11 +1,23 @@
 receivers:
-  filelog:
+  # Receiver pour Docker (existant)
+  filelog/docker:
     include: [ /var/lib/docker/containers/*/*.log ]
     operators:
       - type: json_parser
         timestamp:
           parse_from: attributes.time
           layout: '%Y-%m-%dT%H:%M:%S.%LZ'
+
+  # NOUVEAU : Receiver pour les logs systèmes
+  filelog/system:
+    include: 
+      - /var/log/syslog
+      - /var/log/auth.log
+    start_at: end
+    operators:
+      - type: add
+        field: attributes.log_type
+        value: system
 
 processors:
   batch:
@@ -19,6 +31,7 @@ exporters:
 service:
   pipelines:
     logs:
-      receivers: [filelog]
+      # On ajoute le nouveau receiver ici
+      receivers: [filelog/docker, filelog/system]
       processors: [batch]
       exporters: [otlphttp]

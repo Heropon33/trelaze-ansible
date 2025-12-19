@@ -16,3 +16,10 @@
     name: otelcol
     groups: docker
     append: yes
+
+
+- name: Ajouter otelcol au groupe adm pour lire les logs systemes
+  user:
+    name: otelcol
+    groups: adm
+    append: yes
