@@ -18,7 +18,7 @@ processors:
 
 exporters:
   otlp:
-    endpoint: "{{ hostvars['supervision']['ansible_host'] }}:4317"
+    endpoint: "{{ hostvars['supervision'].ansible_host }}:4317"
     tls:
       insecure: true
 
