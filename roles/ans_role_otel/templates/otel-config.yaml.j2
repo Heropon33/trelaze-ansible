@@ -1,5 +1,4 @@
 receivers:
-  # Receiver pour Docker (existant)
   filelog/docker:
     include: [ /var/lib/docker/containers/*/*.log ]
     operators:
@@ -7,31 +6,28 @@ receivers:
         timestamp:
           parse_from: attributes.time
           layout: '%Y-%m-%dT%H:%M:%S.%LZ'
-
-  # NOUVEAU : Receiver pour les logs systèmes
+  
   filelog/system:
-    include: 
-      - /var/log/syslog
-      - /var/log/auth.log
+    include: [ /var/log/syslog, /var/log/auth.log ]
     start_at: end
-    operators:
-      - type: add
-        field: attributes.log_type
-        value: system
 
 processors:
   batch:
+  attributes:
+    actions:
+      - key: log_source
+        value: "webserver03"
+        action: insert
 
 exporters:
   otlphttp:
-    endpoint: "http://{{ hostvars['supervision01'].ansible_host }}:3100/otlp"
+    endpoint: "http://159.8.76.116:3100/otlp"
     tls:
       insecure: true
 
 service:
   pipelines:
     logs:
-      # On ajoute le nouveau receiver ici
       receivers: [filelog/docker, filelog/system]
-      processors: [batch]
+      processors: [attributes, batch]
       exporters: [otlphttp]
