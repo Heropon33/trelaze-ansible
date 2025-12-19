@@ -1,26 +1,18 @@
 ---
-- name: Télécharger le paquet OTel
-  get_url:
-    url: "https://github.com/open-telemetry/opentelemetry-collector-releases/releases/download/v0.90.0/otelcol-contrib_0.90.0_linux_amd64.deb"
-    dest: "/tmp/otelcol.deb"
-
-- name: Installer le paquet
-  apt:
-    deb: "/tmp/otelcol.deb"
-
-- name: Configurer OTel
-  template:
-    src: otel-config.yaml.j2
-    dest: /etc/otelcol-contrib/config.yaml
-
-- name: Ajouter otelcol au groupe docker pour lire les logs
+- name: Ajouter l'utilisateur otelcol au groupe root et docker
   user:
     name: otelcol
-    groups: docker
+    groups: docker,root
     append: yes
 
-- name: Relancer OTel
+- name: Modifier les permissions du dossier containers de Docker
+  # Cela permet à l'agent de traverser les dossiers pour atteindre les .log
+  file:
+    path: /var/lib/docker/containers
+    mode: '0751'
+    state: directory
+
+- name: Relancer l'agent OTel
   systemd:
     name: otelcol-contrib
     state: restarted
-    enabled: yes
