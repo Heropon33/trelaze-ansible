@@ -5,12 +5,12 @@
     state: stopped
   ignore_errors: yes
 
-- name: Nettoyer la configuration
+- name: SUPPRIMER les anciennes données (Changement de format de DB requis)
   file:
-    path: /etc/loki-config.yaml
+    path: /tmp/loki
     state: absent
 
-- name: Créer les répertoires de données
+- name: Recréer les répertoires
   file:
     path: "{{ item }}"
     state: directory
@@ -22,7 +22,7 @@
     - /tmp/loki/chunks
     - /tmp/loki/rules
 
-- name: Configuration MINIMALISTE (Port 3100 uniquement)
+- name: Déployer Config Loki v3 (Compatible OTLP/TSDB)
   copy:
     dest: /etc/loki-config.yaml
     content: |
@@ -46,15 +46,15 @@
 
       schema_config:
         configs:
-          - from: 2020-10-24
-            store: boltdb-shipper
+          - from: 2024-01-01
+            store: tsdb            # <-- CHANGEMENT ICI (était boltdb-shipper)
             object_store: filesystem
-            schema: v11
+            schema: v13            # <-- CHANGEMENT ICI (était v11)
             index:
               prefix: index_
               period: 24h
 
-      # Cette ligne permet d'accepter les métadonnées OTel sans configurer de port spécial
+      # Cette section est maintenant valide car on est en v13/tsdb
       limits_config:
         allow_structured_metadata: true
 
