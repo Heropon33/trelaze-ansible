@@ -11,9 +11,7 @@ processors:
   batch:
 
 exporters:
-  # Utilisation du protocole HTTP standard (plus robuste ici)
   otlphttp:
-    # On pointe vers le port 3100 avec le chemin /otlp
     endpoint: "http://{{ hostvars['supervision01'].ansible_host }}:3100/otlp"
     tls:
       insecure: true
@@ -23,5 +21,4 @@ service:
     logs:
       receivers: [filelog]
       processors: [batch]
-      # Attention : on appelle bien l'exportateur 'otlphttp' défini au-dessus
       exporters: [otlphttp]

@@ -1,18 +1,18 @@
 ---
-- name: Ajouter l'utilisateur otelcol au groupe root et docker
-  user:
-    name: otelcol
-    groups: docker,root
-    append: yes
+- name: Déployer la configuration OTel finale
+  template:
+    src: otel-config.yaml.j2
+    dest: /etc/otelcol-contrib/config.yaml
+  notify: restart otel
 
-- name: Modifier les permissions du dossier containers de Docker
-  # Cela permet à l'agent de traverser les dossiers pour atteindre les .log
+- name: S'assurer que les permissions Docker sont correctes
   file:
     path: /var/lib/docker/containers
     mode: '0751'
     state: directory
 
-- name: Relancer l'agent OTel
-  systemd:
-    name: otelcol-contrib
-    state: restarted
+- name: Ajouter l'utilisateur otelcol au groupe docker
+  user:
+    name: otelcol
+    groups: docker
+    append: yes

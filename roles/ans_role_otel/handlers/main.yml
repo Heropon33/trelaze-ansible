@@ -1,5 +1,4 @@
----
-- name: Relancer OTel
+- name: restart otel
   systemd:
     name: otelcol-contrib
     state: restarted
