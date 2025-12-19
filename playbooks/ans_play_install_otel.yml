@@ -1,0 +1,6 @@
+---
+- name: Deploiement de Otel
+  hosts: robotshop
+  become: yes
+  roles:
+    - ans_role_otel
