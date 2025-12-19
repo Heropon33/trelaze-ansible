@@ -1,4 +1,5 @@
+---
 - name: Relancer OTel
-   systemd:
-     name: otelcol-contrib
-     state: restarted
+  systemd:
+    name: otelcol-contrib
+    state: restarted
