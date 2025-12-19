@@ -1,12 +1,13 @@
 ---
-- name: Installer unzip
+- name: Installer les dépendances
   apt:
-    name: unzip
+    name: [unzip, curl]
     state: present
+    update_cache: yes
 
-- name: Télécharger Loki
+- name: Télécharger le binaire Loki v3.0.0
   get_url:
-    url: "https://github.com/grafana/loki/releases/download/v2.9.4/loki-linux-amd64.zip"
+    url: "https://github.com/grafana/loki/releases/download/v3.0.0/loki-linux-amd64.zip"
     dest: "/tmp/loki.zip"
 
 - name: Dézipper Loki
@@ -14,8 +15,14 @@
     src: "/tmp/loki.zip"
     dest: "/usr/local/bin"
     remote_src: yes
+    creates: "/usr/local/bin/loki-linux-amd64"
 
-- name: Créer la configuration Loki
+- name: S'assurer que le binaire est exécutable
+  file:
+    path: /usr/local/bin/loki-linux-amd64
+    mode: '0755'
+
+- name: Créer la configuration Loki avec support OTLP
   copy:
     dest: /etc/loki-config.yaml
     content: |
@@ -23,6 +30,7 @@
       server:
         http_listen_port: 3100
       common:
+        instance_addr: 127.0.0.1
         path_prefix: /tmp/loki
         storage:
           filesystem:
@@ -34,6 +42,9 @@
             store: inmemory
       otlp:
         grpc_listen_address: "0.0.0.0:4317"
+        http_listen_address: "0.0.0.0:4318"
+      limits_config:
+        allow_structured_metadata: true
       schema_config:
         configs:
           - from: 2020-10-24
@@ -49,15 +60,18 @@
     dest: /etc/systemd/system/loki.service
     content: |
       [Unit]
-      Description=Loki Service
+      Description=Loki Service v3
+      After=network.target
       [Service]
+      Type=simple
       ExecStart=/usr/local/bin/loki-linux-amd64 -config.file=/etc/loki-config.yaml
       Restart=always
       [Install]
       WantedBy=multi-user.target
 
-- name: Démarrer Loki
+- name: Démarrer et activer Loki
   systemd:
     name: loki
-    state: started
+    state: restarted
     enabled: yes
+    daemon_reload: yes
