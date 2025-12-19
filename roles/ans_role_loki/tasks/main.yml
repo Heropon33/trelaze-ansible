@@ -5,24 +5,14 @@
     system: yes
     shell: /sbin/nologin
 
-- name: Télécharger le binaire Loki
-  get_url:
-    url: "https://github.com/grafana/loki/releases/download/v3.0.0/loki-linux-amd64.zip"
-    dest: /tmp/loki.zip
-
-- name: Installer unzip
-  package:
-    name: unzip
-    state: present
-
-- name: Décompresser le binaire Loki
+- name: Télécharger et installer Loki
   unarchive:
-    src: /tmp/loki.zip
+    src: "https://github.com/grafana/loki/releases/download/v3.0.0/loki-linux-amd64.zip"
     dest: /usr/local/bin
     remote_src: yes
     creates: /usr/local/bin/loki-linux-amd64
 
-- name: Créer les répertoires de configuration et de données
+- name: Créer les répertoires nécessaires
   file:
     path: "{{ item }}"
     state: directory
@@ -32,8 +22,6 @@
   with_items:
     - /etc/loki
     - /tmp/loki
-    - /tmp/loki/index
-    - /tmp/loki/chunks
 
 - name: Déployer la configuration Loki
   template:
@@ -43,7 +31,15 @@
     group: loki
   notify: restart loki
 
-- name: Créer le service systemd pour Loki
+- name: Fixer les permissions (Correctif Root)
+  file:
+    path: /tmp/loki
+    state: directory
+    owner: loki
+    group: loki
+    recurse: yes
+
+- name: Créer le service systemd
   copy:
     dest: /etc/systemd/system/loki.service
     content: |
@@ -60,10 +56,3 @@
       [Install]
       WantedBy=multi-user.target
   notify: restart loki
-
-- name: Démarrer et activer le service Loki
-  systemd:
-    name: loki
-    state: started
-    enabled: yes
-    daemon_reload: yes
