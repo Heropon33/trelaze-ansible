@@ -16,13 +16,6 @@ common:
     kvstore:
       store: inmemory
 
-query_range:
-  results_cache:
-    cache:
-      embedded_cache:
-        enabled: true
-        max_size_mb: 100
-
 schema_config:
   configs:
     - from: 2024-01-01
@@ -38,7 +31,9 @@ limits_config:
   reject_old_samples: true
   reject_old_samples_max_age: 168h
 
-# Activation explicite du point d'entrée OTLP
+# On déplace l'activation OTLP ici
+# Si la version 3.0.0 refuse toujours le bloc 'otlp',
+# Loki v3 l'active souvent par défaut via le endpoint /otlp
 otlp:
   protocols:
     http:
@@ -46,4 +41,5 @@ otlp:
 
 compactor:
   working_directory: /tmp/loki/compactor
-  shared_store: filesystem
+  # Correction ici : 'shared_store' -> 'storage_type'
+  storage_type: filesystem
