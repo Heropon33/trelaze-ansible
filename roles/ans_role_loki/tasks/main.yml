@@ -1,11 +1,16 @@
 ---
-- name: S'assurer que Loki est arrêté
+- name: Arrêter Loki
   systemd:
     name: loki
     state: stopped
   ignore_errors: yes
 
-- name: Nettoyer et créer les répertoires
+- name: Nettoyer la configuration
+  file:
+    path: /etc/loki-config.yaml
+    state: absent
+
+- name: Créer les répertoires de données
   file:
     path: "{{ item }}"
     state: directory
@@ -17,7 +22,7 @@
     - /tmp/loki/chunks
     - /tmp/loki/rules
 
-- name: Appliquer la configuration Loki v3 (Syntaxe OTLP explicite)
+- name: Configuration MINIMALISTE (Port 3100 uniquement)
   copy:
     dest: /etc/loki-config.yaml
     content: |
@@ -39,17 +44,6 @@
           kvstore:
             store: inmemory
 
-      # Syntaxe v3 : Le bloc otlp contient une section receiver
-      otlp:
-        receiver:
-          grpc:
-            endpoint: 0.0.0.0:4317
-          http:
-            endpoint: 0.0.0.0:4318
-
-      limits_config:
-        allow_structured_metadata: true
-
       schema_config:
         configs:
           - from: 2020-10-24
@@ -60,7 +54,11 @@
               prefix: index_
               period: 24h
 
-- name: Relancer Loki v3
+      # Cette ligne permet d'accepter les métadonnées OTel sans configurer de port spécial
+      limits_config:
+        allow_structured_metadata: true
+
+- name: Démarrer Loki
   systemd:
     name: loki
     state: restarted

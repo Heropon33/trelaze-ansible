@@ -6,19 +6,15 @@ receivers:
         timestamp:
           parse_from: attributes.time
           layout: '%Y-%m-%dT%H:%M:%S.%LZ'
-  hostmetrics:
-    collection_interval: 30s
-    scrapers:
-      cpu:
-      memory:
-      disk:
 
 processors:
   batch:
 
 exporters:
-  otlp:
-    endpoint: "{{ hostvars['supervision01'].ansible_host }}:4317"
+  # Utilisation du protocole HTTP standard (plus robuste ici)
+  otlphttp:
+    # On pointe vers le port 3100 avec le chemin /otlp
+    endpoint: "http://{{ hostvars['supervision01'].ansible_host }}:3100/otlp"
     tls:
       insecure: true
 
@@ -27,8 +23,5 @@ service:
     logs:
       receivers: [filelog]
       processors: [batch]
-      exporters: [otlp]
-    metrics:
-      receivers: [hostmetrics]
-      processors: [batch]
-      exporters: [otlp]
+      # Attention : on appelle bien l'exportateur 'otlphttp' défini au-dessus
+      exporters: [otlphttp]
